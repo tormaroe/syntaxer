@@ -1,16 +1,16 @@
-# tormaroe.syntaxer
+# syntaxer
 
 Source code to HTML formatter and syntax highlighter.
 
 Status: Alpha! Seems to be working for ruby source code, but I know there are some holes.
 
-There exists many libraries and tools like this, but I wanted to make my own. 
+There exists many libraries and tools like this, but I wanted to make my own in clojure. 
 
 ## Usage
 
 If you have leiningen, you may run:
 
-  lein run ruby some_ruby_file.rb
+    lein run ruby some_ruby_file.rb
 
 HTML will be printed to standard out.
 
