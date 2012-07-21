@@ -45,8 +45,7 @@
   (loop [[t & tokenizers] tokenizers]
     (if t
       (if-let [match (first (re-seq (:re t) s))]
-        { :token match 
-          :type (:type t) }
+        [ match (:type t) ]
         (recur tokenizers)))))
 
 (defn tokenize
@@ -57,7 +56,7 @@
   ([lang-tokenizers input tokens]
     (if-let [t (get-first-token lang-tokenizers input)]
       (recur lang-tokenizers 
-             (subs input (count (:token t)))
+             (subs input (count (first t)))
              (conj tokens t))
       tokens)))
 
@@ -80,7 +79,7 @@
     (map char->html s)
     (apply str)))
 
-(defn token->html [lang {text :token type :type}]
+(defn token->html [lang [text type]]
   (if-let [color (type (lang colors))]
     (if (fn? color) 
       (if-let [dynamic-style (color text)]
@@ -95,7 +94,7 @@
       \newline
       (->> 
         (tokenize lang s)
-        (map #(assoc % :token (html-encode (:token %))))
+        (map #(assoc % 0 (html-encode (first %))))
         (map (partial token->html lang))) 
       \newline]))
 

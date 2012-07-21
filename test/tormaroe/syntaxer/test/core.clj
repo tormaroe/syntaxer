@@ -12,80 +12,80 @@
   
     (get-first-ruby-token "")                => nil
 
-    (get-first-ruby-token " ")               => {:token " " :type :whitespace}
-    (get-first-ruby-token "  ")              => {:token "  " :type :whitespace}
-    (get-first-ruby-token " \t")             => {:token " \t" :type :whitespace}
-    (get-first-ruby-token "\n")              => {:token "\n" :type :whitespace}
+    (get-first-ruby-token " ")               => [" " :whitespace]
+    (get-first-ruby-token "  ")              => ["  " :whitespace]
+    (get-first-ruby-token " \t")             => [" \t" :whitespace]
+    (get-first-ruby-token "\n")              => ["\n" :whitespace]
 
-    (get-first-ruby-token "||=")              => {:token "||=" :type :syntax}
+    (get-first-ruby-token "||=")             => ["||=" :syntax]
 
-    (get-first-ruby-token "123")             => {:token "123" :type :number}
-    (get-first-ruby-token "1.05")            => {:token "1.05" :type :number}
-    (get-first-ruby-token "foo")             => {:token "foo" :type :word}
-    (get-first-ruby-token "'foo'")           => {:token "'foo'" :type :string}
-    (get-first-ruby-token "\"foo\"")         => {:token "\"foo\"" :type :string}
-    (get-first-ruby-token "\"foo\\\"bar\"")  => {:token "\"foo\\\"bar\"" :type :string}
-    (get-first-ruby-token "'foo\\'bar'")     => {:token "'foo\\'bar'" :type :string}
-    (get-first-ruby-token "\"foo\",\"bar\"") => {:token "\"foo\"" :type :string}
+    (get-first-ruby-token "123")             => ["123" :number]
+    (get-first-ruby-token "1.05")            => ["1.05" :number]
+    (get-first-ruby-token "foo")             => ["foo" :word]
+    (get-first-ruby-token "'foo'")           => ["'foo'" :string]
+    (get-first-ruby-token "\"foo\"")         => ["\"foo\"" :string]
+    (get-first-ruby-token "\"foo\\\"bar\"")  => ["\"foo\\\"bar\"" :string]
+    (get-first-ruby-token "'foo\\'bar'")     => ["'foo\\'bar'" :string]
+    (get-first-ruby-token "\"foo\",\"bar\"") => ["\"foo\"" :string]
     
-    (get-first-ruby-token "foo, bar")        => {:token "foo" :type :word}
-    (get-first-ruby-token "foo-bar")         => {:token "foo" :type :word}
-    (get-first-ruby-token "foo(bar)")        => {:token "foo" :type :word}
+    (get-first-ruby-token "foo, bar")        => ["foo" :word]
+    (get-first-ruby-token "foo-bar")         => ["foo" :word]
+    (get-first-ruby-token "foo(bar)")        => ["foo" :word]
     
     ))
 
 (fact
-  (tokenize :ruby "foo") => [{:token "foo" :type :word}]
-  (tokenize :ruby "foo_1") => [{:token "foo_1" :type :word}]
+  (tokenize :ruby "foo")        => [["foo" :word]]
+  (tokenize :ruby "foo_1")      => [["foo_1" :word]]
   
-  (tokenize :ruby "foo bar") => [{:token "foo" :type :word}
-                                 {:token " " :type :whitespace}
-                                 {:token "bar" :type :word}]
+  (tokenize :ruby "foo bar")    => [["foo" :word]
+                                    [" " :whitespace]
+                                    ["bar" :word]]
 
-  (tokenize :ruby "Foo::Bar") => [{:token "Foo" :type :constant}
-                                  {:token "::" :type :syntax}
-                                  {:token "Bar" :type :constant}]
+  (tokenize :ruby "Foo::Bar")   => [["Foo" :constant]
+                                    ["::" :syntax]
+                                    ["Bar" :constant]]
   
-  (tokenize :ruby "foo(1,2,3)") =>  [{:token "foo", :type :word} 
-                                     {:token "(", :type :syntax} 
-                                     {:token "1", :type :number} 
-                                     {:token ",", :type :syntax} 
-                                     {:token "2", :type :number} 
-                                     {:token ",", :type :syntax} 
-                                     {:token "3", :type :number} 
-                                     {:token ")", :type :syntax}] 
+  (tokenize :ruby "foo(1,2,3)") =>  [["foo", :word] 
+                                     ["(", :syntax] 
+                                     ["1", :number] 
+                                     [",", :syntax] 
+                                     ["2", :number] 
+                                     [",", :syntax] 
+                                     ["3", :number] 
+                                     [")", :syntax]] 
 
-  (tokenize :ruby "1+2==") => [{:token "1" :type :number}
-                               {:token "+" :type :operator}
-                               {:token "2" :type :number}
-                               {:token "==" :type :operator}]
+  (tokenize :ruby "1+2==")      => [["1" :number]
+                                    ["+" :operator]
+                                    ["2" :number]
+                                    ["==" :operator]]
 
-  (tokenize :ruby ":foo =>") => [{:token ":foo" :type :keyword}
-                                 {:token " " :type :whitespace}
-                                 {:token "=>" :type :syntax}]
+  (tokenize :ruby ":foo =>")    => [[":foo" :keyword]
+                                    [" " :whitespace]
+                                    ["=>" :syntax]]
 
-  (tokenize :ruby "[1,2]") => [{:token "[" :type :syntax}
-                               {:token "1" :type :number}
-                               {:token "," :type :syntax}
-                               {:token "2" :type :number}
-                               {:token "]" :type :syntax}]
+  (tokenize :ruby "[1,2]")      => [["[" :syntax]
+                                    ["1" :number]
+                                    ["," :syntax]
+                                    ["2" :number]
+                                    ["]" :syntax]]
 
-  (tokenize :ruby "{1=>2}") => [{:token "{" :type :syntax}
-                               {:token "1" :type :number}
-                               {:token "=>" :type :syntax}
-                               {:token "2" :type :number}
-                               {:token "}" :type :syntax}]
+  (tokenize :ruby "{1=>2}")     => [["{" :syntax]
+                                    ["1" :number]
+                                    ["=>" :syntax]
+                                    ["2" :number]
+                                    ["}" :syntax]]
 
   (tokenize :ruby "$foo=1 # this is a comment
                    exit")
             =>
-            [{:token "$foo"                   :type :word}
-             {:token "="                      :type :syntax}
-             {:token "1"                     :type :number}
-             {:token " "                      :type :whitespace}
-             {:token "# this is a comment"    :type :comment}
-             {:token "\n                   "  :type :whitespace}
-             {:token "exit"                   :type :word}]
+            [["$foo"                   :word]
+             ["="                      :syntax]
+             ["1"                      :number]
+             [" "                      :whitespace]
+             ["# this is a comment"    :comment]
+             ["\n                   "  :whitespace]
+             ["exit"                   :word]]
 
   (tokenize :ruby "class Foo
                     def initialize
@@ -93,63 +93,63 @@
                     end
                   end") 
             =>  
-          [{:token "class", :type :word} 
-           {:token " ", :type :whitespace} 
-           {:token "Foo", :type :constant} 
-           {:token "\n                    ", :type :whitespace} 
-           {:token "def", :type :word} 
-           {:token " ", :type :whitespace} 
-           {:token "initialize", :type :word} 
-           {:token "\n                      ", :type :whitespace} 
-           {:token "@bar", :type :word} 
-           {:token " ", :type :whitespace} 
-           {:token "=", :type :syntax} 
-           {:token " ", :type :whitespace} 
-           {:token "1", :type :number} 
-           {:token "\n                    ", :type :whitespace} 
-           {:token "end", :type :word} 
-           {:token "\n                  ", :type :whitespace} 
-           {:token "end", :type :word}])
+          [["class", :word] 
+           [" ", :whitespace] 
+           ["Foo", :constant] 
+           ["\n                    ", :whitespace] 
+           ["def", :word] 
+           [" ", :whitespace] 
+           ["initialize", :word] 
+           ["\n                      ", :whitespace] 
+           ["@bar", :word] 
+           [" ", :whitespace] 
+           ["=", :syntax] 
+           [" ", :whitespace] 
+           ["1", :number] 
+           ["\n                    ", :whitespace] 
+           ["end", :word] 
+           ["\n                  ", :whitespace] 
+           ["end", :word]])
 
 (fact 
   (tokenize :ruby "foo=\"bar\"
 zot=\"google\"")
             =>
-            [{:token "foo"      :type :word}
-             {:token "="        :type :syntax}
-             {:token "\"bar\""  :type :string}
-             {:token "\n"       :type :whitespace}
-             {:token "zot"      :type :word}
-             {:token "="        :type :syntax}
-             {:token "\"google\"" :type :string}]
+            [["foo"      :word]
+             ["="        :syntax]
+             ["\"bar\""  :string]
+             ["\n"       :whitespace]
+             ["zot"      :word]
+             ["="        :syntax]
+             ["\"google\"" :string]]
   (tokenize :ruby "foo='bar'
 zot='google'")
             =>
-            [{:token "foo"      :type :word}
-             {:token "="        :type :syntax}
-             {:token "'bar'"    :type :string}
-             {:token "\n"       :type :whitespace}
-             {:token "zot"      :type :word}
-             {:token "="        :type :syntax}
-             {:token "'google'" :type :string}])
+            [["foo"      :word]
+             ["="        :syntax]
+             ["'bar'"    :string]
+             ["\n"       :whitespace]
+             ["zot"      :word]
+             ["="        :syntax]
+             ["'google'" :string]])
 
 (fact 
   (html-encode "1 <> 3") => "1 &lt;&gt; 3"
   (html-encode "\"")     => "&#34;"
-  (html-encode "'")     => "&#39;"
+  (html-encode "'")      => "&#39;"
   (html-encode "\\")     => "&#92;")
 
 (fact 
   (let [ruby->html (partial token->html :ruby)]
 
-    (ruby->html {:token "exit" :type :word}) => "exit"
+    (ruby->html ["exit" :word]) => "exit"
     
-    (ruby->html {:token "# test" :type :comment}) 
+    (ruby->html ["# test" :comment]) 
         => [:span {:style "color:grey;"} "# test"]
 
-    (ruby->html {:token "and" :type :word}) 
+    (ruby->html ["and" :word]) 
         => [:span {:style "color:blue;"} "and"]
-    (ruby->html {:token "if" :type :word}) 
+    (ruby->html ["if" :word]) 
         => [:span {:style "color:blue;"} "if"]
   ))
 
