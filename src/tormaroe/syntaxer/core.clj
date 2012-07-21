@@ -25,7 +25,7 @@
    })
 
 (def tokenizers
-  { :ruby [{:type :whitespace  :re #"^\s+"}
+  { :ruby [{:type :whitespace :re #"^\s+"}
            {:type :string     :re #"^\"(?:[^\"\\]*(?:\\.[^\"\\]*)*)\""}
            {:type :string     :re #"^'(?:[^'\\]*(?:\\.[^'\\]*)*)'"}
            {:type :comment    :re #"^#[^\n]*"} 
@@ -36,12 +36,16 @@
            {:type :number     :re #"^\d+(?:\.\d+)?"}
            {:type :keyword    :re #"^\:[A-Za-z]+[A-Za-z0-9_]*"} 
            {:type :constant   :re #"^[A-Z]+[A-Za-z0-9_]*"}
-           {:type :word       :re #"^[a-z@$]+[A-Za-z0-9_]*"}
-           ]}) 
+           {:type :word       :re #"^[a-z@$]+[A-Za-z0-9_]*"}]
+   }) 
 
 ;; TOKENIZE
 
-(defn get-first-token [tokenizers s]
+(defn get-first-token 
+  "Given a sequence of tokenizers it finds the first match
+  in s and returns the token as a two element list of
+  the text that matched and the type of the tokenizer."
+  [tokenizers s]
   (loop [[t & tokenizers] tokenizers]
     (if t
       (if-let [match (first (re-seq (:re t) s))]
@@ -49,6 +53,7 @@
         (recur tokenizers)))))
 
 (defn tokenize
+  ""
   ([lang-key input] 
     (tokenize (lang-key tokenizers) 
               input
@@ -75,9 +80,7 @@
     c))
 
 (defn html-encode [s]
-  (->> 
-    (map char->html s)
-    (apply str)))
+  (apply str (map char->html s)))
 
 (defn token->html [lang [text type]]
   (if-let [color (type (lang colors))]
@@ -88,13 +91,16 @@
       [:span {:style color} text])
     text))
 
+(defn swap-at [idx f lst]
+  (assoc lst idx (f (nth lst idx))))
+
 (defn source->html [lang s]
   (html
     [:pre 
       \newline
       (->> 
         (tokenize lang s)
-        (map #(assoc % 0 (html-encode (first %))))
+        (map (partial swap-at 0 html-encode))
         (map (partial token->html lang))) 
       \newline]))
 
